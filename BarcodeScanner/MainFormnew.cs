@@ -1296,7 +1296,7 @@ namespace BarcodeScannerNew
                 }
             }
                 bool isFail = chkFail.Checked;
-              string failReason = isFail ? cmbFailReason.SelectedItem.ToString() : null;
+               string failReason = isFail ? cmbFailReason.SelectedItem.ToString() : null;
 
             var code = txtBarcode.Text.Trim();
             if (string.IsNullOrEmpty(code)) return;
@@ -1311,7 +1311,7 @@ namespace BarcodeScannerNew
                 return;
             }
 
-            // Insert into DB
+           
             bool dbOk = true;
             bool checkPCBA = false;
             bool packing = true;
