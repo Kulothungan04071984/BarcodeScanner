@@ -56,7 +56,7 @@ namespace BarcodeScannerNew
         private string _currentTrayID = null;
         private int _traySerial = 0;
         private bool _trayCreated = false;
-        private const int SCAN_TARGET = 48;
+        private int SCAN_TARGET = 0;
         private const int OBA_TARGET = 2;
         public string[] nextidinfo = { "", "" };
         public string[] nextstages = { "", "" };
@@ -1188,6 +1188,17 @@ namespace BarcodeScannerNew
             string customer = cmbCustomer.Text;
             string fgNumber  = cmbFGNumber.SelectedItem.ToString();
             string workOrder = cmbWorkOrder.SelectedItem.ToString();
+            string product = cmbProduct.Text.ToString();
+            string productname = cmbProductName.Text.ToString();
+
+            if (product == "DRAM")
+                SCAN_TARGET = 48;
+            else if (productname == "SATA")
+                SCAN_TARGET = 38;
+            else if (productname == "M.2")
+                SCAN_TARGET = 23;
+
+
             //string julian    = DateTime.Now.DayOfYear.ToString("D3");
             string julian = DateTime.Now.ToString("yy") + DateTime.Now.DayOfYear.ToString("000");
 
@@ -1340,6 +1351,7 @@ namespace BarcodeScannerNew
                 AddToListView(code);
                 UpdateStats();
                  nextstages = Nextstartchecksfcs();
+
                 if (_scannedBarcodes.Count <= SCAN_TARGET)
                 {
                    
@@ -1347,7 +1359,7 @@ namespace BarcodeScannerNew
                     nextstages[1] = "Packing";
                     packing = true;
                 }
-                else if (_scannedBarcodes.Count == 49 || _scannedBarcodes.Count == 50)
+                else if (_scannedBarcodes.Count == SCAN_TARGET + 1 || _scannedBarcodes.Count == SCAN_TARGET + 2)
                 {
                     nextstages[0] = "240";
                     nextstages[1] = "Pass Mark Test";
@@ -1359,8 +1371,23 @@ namespace BarcodeScannerNew
                     AppendLog($"[DB ERROR] Could not update next stage for {_currentTrayID}", C_WARNING);
                     return;
                 }
-                if (_scannedBarcodes.Count == 50)
-                      GenerateBarcode();
+            
+                if (cmbProduct.Text == "DRAM")
+                {
+                    if (_scannedBarcodes.Count == 50)
+                        GenerateBarcode();
+                }
+                else if (cmbProductName.Text == "SATA")
+                {
+                    if (_scannedBarcodes.Count == 40)
+                        GenerateBarcode();
+                }
+                else if (cmbProductName.Text == "M.2")
+                {
+                    if (_scannedBarcodes.Count == 25)
+                        GenerateBarcode();
+                }
+                  
                
 
 
