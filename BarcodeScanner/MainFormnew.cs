@@ -48,6 +48,7 @@ namespace BarcodeScannerNew
         private Button btnClear;
         private Button btnCreateTray;
         private Button btnExport;
+        private Button btnRePrint;
 
         private ThemedProgressBar pbScan;
 
@@ -245,6 +246,27 @@ namespace BarcodeScannerNew
                 Bounds = new Rectangle(0, index * 48 + 16, 220, 40),
                 FlatAppearance = { BorderSize = 0, MouseOverBackColor = Color.FromArgb(30, 0, 210, 255) }
             };
+            btn.MouseEnter += (s, _) => btn.ForeColor = C_ACCENT;
+            btn.MouseLeave += (s, _) => btn.ForeColor = C_MUTED;
+            return btn;
+        }
+
+        private Button BuildReprintButton(string text, int index)
+        {   var btn = new Button
+            {
+                Text = text,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5f),
+                ForeColor = C_MUTED,
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0),
+                Bounds = new Rectangle(0, index * 48 + 16, 220, 40),
+                FlatAppearance = { BorderSize = 0, MouseOverBackColor = Color.FromArgb(30, 0, 210, 255) },
+                Width= 160,
+                Visible= false
+        };
             btn.MouseEnter += (s, _) => btn.ForeColor = C_ACCENT;
             btn.MouseLeave += (s, _) => btn.ForeColor = C_MUTED;
             return btn;
@@ -585,11 +607,14 @@ namespace BarcodeScannerNew
         "Other",
    });
             cmbFailReason.SelectedIndex = 0;
-
+            btnRePrint = BuildReprintButton("⎘  Re-Print Label", 0);
+            btnRePrint.Location = new Point(800, 20);
+             
             card.Controls.Add(lblTitle);
             card.Controls.Add(txtBarcode);
             card.Controls.Add(chkFail);
             card.Controls.Add(cmbFailReason);
+            card.Controls.Add(btnRePrint);
 
             panelInputCard.Controls.Add(card);
         }
@@ -1105,6 +1130,7 @@ namespace BarcodeScannerNew
             btnClear.Click += (s, _) => ClearAll();
             btnCreateTray.Click += (s, _) => CreateTrayID();
             btnExport.Click += (s, _) => ExportList();
+            btnRePrint.Click += (s, _) => GenerateBarcode();
             this.Load += (s, _) => cmbCustomer.Focus();
         }
         private void CmbProduct_Changed(object sender, EventArgs e)
@@ -1598,6 +1624,8 @@ namespace BarcodeScannerNew
             }
             finally
             {
+                 btnRePrint.Visible = true;
+
                 // Quit the BarTender application
                 if (btApp != null)
                 {
