@@ -1354,17 +1354,17 @@ namespace BarcodeScannerNew
             bool packing = true;
             try
             {
-                //string pcbaNo = getPCBANumnber(code);
-                //if (string.IsNullOrEmpty(pcbaNo))
-                //{
-                //    AppendLog($"PCBA Serail Number Not Fount - {code}: ", C_WARNING);
-                //    return;
-                //}
-                //checkPCBA = checkPCBAStage(pcbaNo);
+                string pcbaNo = getPCBANumnber(code);
+                if (string.IsNullOrEmpty(pcbaNo))
+                {
+                    AppendLog($"PCBA Serail Number Not Fount - {code}: ", C_WARNING);
+                    return;
+                }
+                checkPCBA = checkPCBAStage(pcbaNo);
 
-                checkPCBA = checkPCBAStage(code);
+              //  checkPCBA = checkPCBAStage(code);
                 if (checkPCBA)
-                    InsertBoardScan(_currentTrayID, code, code);
+                    InsertBoardScan(_currentTrayID, code, pcbaNo);
                 else
                 {
                     AppendLog($"[MisMatch] {code} — Stage MisMatch!", C_WARNING);
@@ -1372,9 +1372,9 @@ namespace BarcodeScannerNew
                 }
 
 
-                _scannedBarcodes.Add(code);
-                AppendLog(code, dbOk ? C_ACCENT : C_WARNING);
-                AddToListView(code);
+                _scannedBarcodes.Add(pcbaNo);
+                AppendLog(pcbaNo, dbOk ? C_ACCENT : C_WARNING);
+                AddToListView(pcbaNo);
                 UpdateStats();
                  nextstages = Nextstartchecksfcs();
 
@@ -1391,7 +1391,7 @@ namespace BarcodeScannerNew
                     nextstages[1] = "Pass Mark Test";
                     packing = false;
                 }
-               int resultNextstage = UpdateNextStage(code, nextstages[0], nextstages[1]);
+               int resultNextstage = UpdateNextStage(pcbaNo, nextstages[0], nextstages[1]);
                 if (resultNextstage == 0)
                 {
                     AppendLog($"[DB ERROR] Could not update next stage for {_currentTrayID}", C_WARNING);
@@ -1757,7 +1757,14 @@ namespace BarcodeScannerNew
         private void UpdateStats()
         {
             int cnt = _scannedBarcodes.Count;
-            pbScan.Value             = Math.Min(cnt, SCAN_TARGET);
+            //pbScan.Value             = Math.Min(cnt, SCAN_TARGET);
+            if (pbScan.Maximum != SCAN_TARGET)
+                pbScan.Maximum = SCAN_TARGET;
+
+            pbScan.Value = Math.Max(
+                pbScan.Minimum,
+                Math.Min(cnt, pbScan.Maximum));
+
             lblProgressInfo.Text     = $"Boards scanned in current tray: {cnt}";
             lblScanned.Tag           = cnt.ToString();
             lblScanned.Invalidate();
