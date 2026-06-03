@@ -1760,7 +1760,14 @@ namespace BarcodeScannerNew
         private void UpdateStats()
         {
             int cnt = _scannedBarcodes.Count;
-            pbScan.Value             = Math.Min(cnt, SCAN_TARGET);
+            //pbScan.Value             = Math.Min(cnt, SCAN_TARGET);
+            if (pbScan.Maximum != SCAN_TARGET)
+                pbScan.Maximum = SCAN_TARGET;
+
+            pbScan.Value = Math.Max(
+                pbScan.Minimum,
+                Math.Min(cnt, pbScan.Maximum));
+
             lblProgressInfo.Text     = $"Boards scanned in current tray: {cnt}";
             lblScanned.Tag           = cnt.ToString();
             lblScanned.Invalidate();
