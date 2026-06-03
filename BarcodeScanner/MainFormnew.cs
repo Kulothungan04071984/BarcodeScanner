@@ -1,5 +1,8 @@
+using BarTender;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -7,8 +10,7 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using System.Configuration;
-using BarTender;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BarcodeScannerNew
 {
@@ -595,15 +597,15 @@ namespace BarcodeScannerNew
             };
             cmbFailReason.Items.AddRange(new string[]
    {
-        "-- Select Reason --",
-        "Short Circuit",
-        "Open Circuit",
-        "Missing Component",
-        "Wrong Component",
-        "Solder Bridge",
-        "Damaged PCB",
-        "Component Shifted",
-        "Cold Solder Joint",
+        "-- Select Fail Category --",
+       "Component Damage",
+        "Label erase",
+        "Label Misprint",
+        "PCBA Damage",
+        "Gold Finger damage",
+        "Solder splash in GF",
+        "GF Scratch",
+        "Copper expose",
         "Other",
    });
             cmbFailReason.SelectedIndex = 0;
@@ -1352,19 +1354,20 @@ namespace BarcodeScannerNew
             bool dbOk = true;
             bool checkPCBA = false;
             bool packing = true;
+            string test = string.Empty;
             try
             {
-                //string pcbaNo = getPCBANumnber(code);
-                //if (string.IsNullOrEmpty(pcbaNo))
-                //{
-                //    AppendLog($"PCBA Serail Number Not Fount - {code}: ", C_WARNING);
-                //    return;
-                //}
-                //checkPCBA = checkPCBAStage(pcbaNo);
+                string pcbaNo = getPCBANumnber(code);
+                if (string.IsNullOrEmpty(pcbaNo))
+                {
+                    AppendLog($"PCBA Serail Number Not Fount - {code}: ", C_WARNING);
+                    return;
+                }
+                checkPCBA = checkPCBAStage(pcbaNo);
 
-                checkPCBA = checkPCBAStage(code);
+               // checkPCBA = checkPCBAStage(code);
                 if (checkPCBA)
-                    InsertBoardScan(_currentTrayID, code, code);
+                    InsertBoardScan(_currentTrayID, code, pcbaNo);
                 else
                 {
                     AppendLog($"[MisMatch] {code} — Stage MisMatch!", C_WARNING);
@@ -1372,9 +1375,9 @@ namespace BarcodeScannerNew
                 }
 
 
-                _scannedBarcodes.Add(code);
-                AppendLog(code, dbOk ? C_ACCENT : C_WARNING);
-                AddToListView(code);
+                _scannedBarcodes.Add(pcbaNo);
+                AppendLog(pcbaNo, dbOk ? C_ACCENT : C_WARNING);
+                AddToListView(pcbaNo);
                 UpdateStats();
                  nextstages = Nextstartchecksfcs();
 
@@ -1391,7 +1394,7 @@ namespace BarcodeScannerNew
                     nextstages[1] = "Pass Mark Test";
                     packing = false;
                 }
-               int resultNextstage = UpdateNextStage(code, nextstages[0], nextstages[1]);
+               int resultNextstage = UpdateNextStage(pcbaNo, nextstages[0], nextstages[1]);
                 if (resultNextstage == 0)
                 {
                     AppendLog($"[DB ERROR] Could not update next stage for {_currentTrayID}", C_WARNING);
@@ -1430,7 +1433,7 @@ namespace BarcodeScannerNew
         public void FailBoardUpdated()
         {
             string workorder = cmbWorkOrder.Text.ToString();
-            string pcbaid=txtBarcode.Text.Trim();
+            string pcbaid=txtBarcode.Text.Trim();// trinm
             string customer=cmbCustomer.Text.ToString();
             string machineName = Environment.MachineName;
             try
